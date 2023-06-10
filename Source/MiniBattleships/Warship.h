@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "WarshipMovementComponent.h"
+
 #include "Warship.generated.h"
 
 UCLASS()
@@ -25,11 +27,30 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
+	// Returns if a pawn is dead
+	UFUNCTION(BlueprintPure)
+	bool bIsDead() const;
+	// Sends current health state to blueprint UI
+	UFUNCTION(BlueprintPure)
+	float GetHealthPercent() const;
+
+
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,AController* EventInstigator,AActor* DamageCauser);
+
 
 private:
 	void UseAbility();
 	void SwitchActionType();
+	
+	//ig default hp is 3
+	UPROPERTY(EditDefaultsOnly)
+	int16 MaxHealthPoints = 3;
 
-	bool isActionMoving;
+	// Defines if a pawn is moving or attacking
+	bool isActionMoving = 1;
 
+	int16 CurrentHealthPoints;
+
+	UWarshipMovementComponent* MovementComponent;
 };
