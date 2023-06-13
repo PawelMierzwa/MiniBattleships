@@ -11,7 +11,7 @@ AWarship::AWarship()
 	PrimaryActorTick.bCanEverTick = true;
 
 	MovementComponent = CreateDefaultSubobject<UWarshipMovementComponent>(TEXT("Movement Component"));
-
+	
 }
 
 // Called when the game starts or when spawned
@@ -31,9 +31,6 @@ void AWarship::Tick(float DeltaTime)
 // Called to bind functionality to input
 void AWarship::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	PlayerInputComponent->BindAction(TEXT("Ability"), EInputEvent::IE_Pressed, this, &AWarship::UseAbility);
-	PlayerInputComponent->BindAction(TEXT("MoveAttackSwitch"), EInputEvent::IE_Pressed, this, &AWarship::SwitchActionType);
 
 }
 
@@ -68,18 +65,4 @@ float AWarship::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 
 
 	return DamageApplied;
-}
-
-void AWarship::UseAbility()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Ability used"));
-	//Actor component of a specific ability :)
-}
-
-void AWarship::SwitchActionType()
-{
-	//true - Action = move
-	//false - Action = attack
-	isActionMoving = !isActionMoving;
-	UE_LOG(LogTemp, Warning, TEXT("Switched the action type to %d"), isActionMoving);
 }
