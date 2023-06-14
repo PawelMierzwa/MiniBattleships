@@ -24,6 +24,8 @@ private:
 	void SetControlledPawn(FHitResult HitResult);
 	void UseAbility(AWarship* User);
 
+	void OnShipSelected();
+
 	//Input bindings
 	void OnMouseClick();
 	void AbilityTrigger();

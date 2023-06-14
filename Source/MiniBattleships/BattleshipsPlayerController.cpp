@@ -2,6 +2,8 @@
 
 
 #include "BattleshipsPlayerController.h"
+#include "SelectableComponent.h"
+
 #include "DrawDebugHelpers.h"
 
 void ABattleshipsPlayerController::BeginPlay()
@@ -25,15 +27,15 @@ void ABattleshipsPlayerController::SetupInputComponent()
 	InputComponent->BindAction(TEXT("MouseClick"), EInputEvent::IE_Pressed, this, &ABattleshipsPlayerController::OnMouseClick);
 }
 
-void ABattleshipsPlayerController::SetControlledPawn(FHitResult Hit) 
+void ABattleshipsPlayerController::SetControlledPawn(FHitResult Hit)
 {
 	AActor* ActorHit = Hit.GetActor();
-	if (ActorHit != nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *ActorHit->GetName());
-		GEngine->AddOnScreenDebugMessage(-1, 200, FColor::Red, FString::Printf(TEXT("Hit: %s"), *ActorHit->GetName()));
-		ActivePawn = Cast<AWarship>(ActorHit);
-	}
+	if (ActorHit == nullptr) return;
+
+	UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *ActorHit->GetName());
+	GEngine->AddOnScreenDebugMessage(-1, 200, FColor::Red, FString::Printf(TEXT("Hit: %s"), *ActorHit->GetName()));
+	ActivePawn = Cast<AWarship>(ActorHit);
+	OnShipSelected();
 }
 
 void ABattleshipsPlayerController::UseAbility(AWarship* User)
@@ -43,10 +45,16 @@ void ABattleshipsPlayerController::UseAbility(AWarship* User)
 	//Actor component of a specific ability :)
 }
 
+void ABattleshipsPlayerController::OnShipSelected()
+{
+	USelectableComponent* SelectableComponent = ActivePawn->FindComponentByClass<USelectableComponent>();
+	SelectableComponent->SelectActor();
+}
+
 void ABattleshipsPlayerController::OnMouseClick()
 {
 	FHitResult HitResult;
-	GetHitResultUnderCursor(ECollisionChannel::ECC_Pawn, false, HitResult);
+	GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel1, false, HitResult);
 	SetControlledPawn(HitResult);
 }
 
