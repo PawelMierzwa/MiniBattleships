@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "Components/DecalComponent.h"
+#include "Components/BoxComponent.h"
 #include "WarshipMovementComponent.h"
-
+#include "SelectableComponent.h"
 #include "Warship.generated.h"
 
 UCLASS()
@@ -25,9 +27,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
 	// Damage handling
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
@@ -46,5 +45,19 @@ private:
 	// Self explanatory
 	int16 CurrentHealthPoints;
 
+	//Component responsible for showing and hiding the select decal
+	UPROPERTY(VisibleAnywhere)
+	USelectableComponent* SelectableComponent;
+	//Component handling the movement
+	UPROPERTY(VisibleAnywhere)
 	UWarshipMovementComponent* MovementComponent;
+	//Circle indicating which pawn is selected
+	UPROPERTY(VisibleAnywhere)
+	UDecalComponent* DecalComponent;
+	//Collision box
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* BoxCollision;
+	//Warships Static Mesh
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMeshComponent* ShipMesh;
 };

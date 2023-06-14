@@ -10,8 +10,20 @@ AWarship::AWarship()
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	//Root component setup
+	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("Collision Box"));
+	RootComponent = BoxCollision;
+	BoxCollision->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
+
+	//Mesh setup
+	ShipMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Warship Mesh"));
+	ShipMesh->SetupAttachment(BoxCollision);
+
+	//Components setup
 	MovementComponent = CreateDefaultSubobject<UWarshipMovementComponent>(TEXT("Movement Component"));
-	
+	SelectableComponent = CreateDefaultSubobject<USelectableComponent>(TEXT("Selectable Component"));
+	DecalComponent = CreateDefaultSubobject<UDecalComponent>(TEXT("Selection Decal Component"));
+	DecalComponent->AttachToComponent(BoxCollision, FAttachmentTransformRules::KeepRelativeTransform);
 }
 
 // Called when the game starts or when spawned
@@ -25,12 +37,6 @@ void AWarship::BeginPlay()
 void AWarship::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-}
-
-// Called to bind functionality to input
-void AWarship::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
 
 }
 
@@ -62,7 +68,6 @@ float AWarship::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 		//TODO: Add Collision
 		//GetCapsuleComponent()->SetCollsionEnabled(ECollisionEnabled::NoCollision);
 	}
-
 
 	return DamageApplied;
 }
