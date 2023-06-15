@@ -28,6 +28,7 @@ private:
 
 	//Input bindings
 	void OnMouseClick();
+	void OnMouseRelease();
 	void AbilityTrigger();
 	void SwitchActionType();
 

@@ -3,13 +3,12 @@
 
 #include "BattleshipsPlayerController.h"
 #include "SelectableComponent.h"
-
 #include "DrawDebugHelpers.h"
 
 void ABattleshipsPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	FInputModeGameOnly InputModeData;
+	FInputModeGameAndUI InputModeData;
 	SetInputMode(InputModeData);
 	bShowMouseCursor = true;
 }
@@ -33,7 +32,7 @@ void ABattleshipsPlayerController::SetControlledPawn(FHitResult Hit)
 	if (ActorHit == nullptr) return;
 
 	UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *ActorHit->GetName());
-	GEngine->AddOnScreenDebugMessage(-1, 200, FColor::Red, FString::Printf(TEXT("Hit: %s"), *ActorHit->GetName()));
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("Hit: %s"), *ActorHit->GetName()));
 	ActivePawn = Cast<AWarship>(ActorHit);
 	OnShipSelected();
 }
@@ -47,15 +46,20 @@ void ABattleshipsPlayerController::UseAbility(AWarship* User)
 
 void ABattleshipsPlayerController::OnShipSelected()
 {
+	// create array of all existing ships
+	// deselect all of them
 	USelectableComponent* SelectableComponent = ActivePawn->FindComponentByClass<USelectableComponent>();
 	SelectableComponent->SelectActor();
 }
+
+//function deselect all
 
 void ABattleshipsPlayerController::OnMouseClick()
 {
 	FHitResult HitResult;
 	GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel1, false, HitResult);
 	SetControlledPawn(HitResult);
+	// when clicked on ground deselect all ships
 }
 
 void ABattleshipsPlayerController::AbilityTrigger() {
