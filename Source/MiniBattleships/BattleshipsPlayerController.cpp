@@ -31,10 +31,16 @@ void ABattleshipsPlayerController::SetControlledPawn(FHitResult Hit)
 	AActor* ActorHit = Hit.GetActor();
 	if (ActorHit == nullptr) return;
 
+
 	UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *ActorHit->GetName());
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("Hit: %s"), *ActorHit->GetName()));
-	ActivePawn = Cast<AWarship>(ActorHit);
+
+	AWarship* ClickedPawn = Cast<AWarship>(ActorHit);
+	if (PlayerShips.Find(ClickedPawn) != INDEX_NONE)
+	{
+		ActivePawn = ClickedPawn;
 	OnShipSelected();
+}
 }
 
 void ABattleshipsPlayerController::UseAbility(AWarship* User)
@@ -46,20 +52,37 @@ void ABattleshipsPlayerController::UseAbility(AWarship* User)
 
 void ABattleshipsPlayerController::OnShipSelected()
 {
-	// create array of all existing ships
-	// deselect all of them
+	DeselectAllShips();
 	USelectableComponent* SelectableComponent = ActivePawn->FindComponentByClass<USelectableComponent>();
 	SelectableComponent->SelectActor();
 }
 
-//function deselect all
+void ABattleshipsPlayerController::DeselectAllShips()
+{
+	for (AWarship* Ship : PlayerShips)
+	{
+		USelectableComponent* SelectableComponent = Ship->FindComponentByClass<USelectableComponent>();
+		SelectableComponent->DeselectActor();
+	}
+}
 
 void ABattleshipsPlayerController::OnMouseClick()
 {
-	FHitResult HitResult;
-	GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel1, false, HitResult);
-	SetControlledPawn(HitResult);
-	// when clicked on ground deselect all ships
+	FHitResult HitResultShip;
+	if (GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel1, false, HitResultShip))
+	{
+		SetControlledPawn(HitResultShip);
+		return;
+	}
+
+	FHitResult HitResultFloor;
+	if (GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel2, false, HitResultFloor))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Clicked on the floor, deselecting.."));
+		ActivePawn = nullptr;
+		DeselectAllShips();
+		return;
+	}
 }
 
 void ABattleshipsPlayerController::AbilityTrigger() {

@@ -35,16 +35,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UnhoverActor();
 
-
 private:
 	float GetOwnerCollisionSize();
 	float GetOwnerCollisionHeight();
 
 	bool bSelected = false;
 	bool bHovered = false;
-
-	UMaterialInstanceDynamic* SelectionCircleMaterialInstance;
-	UMaterialInstance* SelectionCircleMaterial;
 
 	UPROPERTY()
 	UDecalComponent* DecalComponent;

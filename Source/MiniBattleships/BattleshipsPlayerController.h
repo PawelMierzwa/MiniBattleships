@@ -20,11 +20,15 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupInputComponent() override;
 
+public:
+	void AddPlayerShip(AWarship* ShipToAdd) { PlayerShips.Add(ShipToAdd); };
+
 private:
 	void SetControlledPawn(FHitResult HitResult);
 	void UseAbility(AWarship* User);
 
 	void OnShipSelected();
+	void DeselectAllShips();
 
 	//Input bindings
 	void OnMouseClick();
@@ -36,4 +40,5 @@ private:
 	bool isActionMoving = 1;
 	//Current clicked pawn
 	AWarship* ActivePawn;
+	TArray<AWarship*> PlayerShips;
 };

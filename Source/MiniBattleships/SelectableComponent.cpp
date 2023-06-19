@@ -19,17 +19,13 @@ void USelectableComponent::BeginPlay()
 	Super::BeginPlay();
 
 	float DecalHeight = GetOwnerCollisionHeight();
-	float DecalRadius = GetOwnerCollisionSize();
+	float DecalRadius = GetOwnerCollisionSize() / 2;
 
 	DecalComponent = GetOwner()->FindComponentByClass<UDecalComponent>();
 
 	//Decal rotation and size
 	DecalComponent->SetRelativeRotation(FRotator::MakeFromEuler(FVector(0.0f, -90.0f, 0.0f)));
 	DecalComponent->DecalSize = FVector(DecalHeight, DecalRadius, DecalRadius);
-
-	//Decal material
-	SelectionCircleMaterialInstance = UMaterialInstanceDynamic::Create(SelectionCircleMaterial, this);
-	DecalComponent->SetDecalMaterial(SelectionCircleMaterialInstance);
 
 	DecalComponent->SetHiddenInGame(true);
 }
