@@ -21,5 +21,8 @@ public:
 
 private:
 	TArray<AActor*> ActorPlayerSpawns;
+	void SpawnShips(class ABattleshipsPlayerController* PlayerController, class APlayerStartingPoint* StartingPoint);
 
+	UPROPERTY(EditDefaultsOnly, Category = "Warship")
+	TSubclassOf<class AWarship> WarshipTestPawnBP;
 };

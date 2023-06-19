@@ -16,15 +16,15 @@ public:
 	// Sets default values for this actor's properties
 	APlayerStartingPoint();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 public:
 	FVector GetCameraLocation() { return CameraLocation->GetComponentLocation(); };
 	FRotator GetCameraRotation() { return CameraLocation->GetComponentRotation(); };
+	FVector GetShipSpawnLocation(int16 index);
+	FRotator GetShipSpawnRotation(int16 index);
 
 private:
+	TArray<UBoxComponent*> SpawnArray;
+
 	UPROPERTY()
 	USceneComponent* SceneComponent;
 	UPROPERTY(EditDefaultsOnly)

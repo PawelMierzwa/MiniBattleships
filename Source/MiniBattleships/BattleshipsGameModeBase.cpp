@@ -3,7 +3,9 @@
 
 #include "BattleshipsGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "BattleshipsPlayerController.h"
 #include "PlayerStartingPoint.h"
+#include "Warship.h"
 #include "PlayerCameraPawn.h"
 
 ABattleshipsGameModeBase::ABattleshipsGameModeBase()
@@ -18,7 +20,6 @@ void ABattleshipsGameModeBase::PostLogin(APlayerController* NewPlayer)
 	SelectedSpawn = ActorPlayerSpawns[FMath::RandRange(0, SpawnsCount - 1)];
 
 	if (!SelectedSpawn) return;
-	UE_LOG(LogTemp, Warning, TEXT("Found a spawn: %s"), *SelectedSpawn->GetName());
 
 	APlayerCameraPawn* CameraPawn = nullptr;
 	APlayerStartingPoint* SelectedStartingPoint = Cast<APlayerStartingPoint>(SelectedSpawn);
@@ -27,7 +28,6 @@ void ABattleshipsGameModeBase::PostLogin(APlayerController* NewPlayer)
 	{
 		const FVector CameraLocation = SelectedStartingPoint->GetCameraLocation();
 		const FRotator CameraRotation = SelectedStartingPoint->GetCameraRotation();
-		UE_LOG(LogTemp, Warning, TEXT("CAMERA LOCATION: X: %d Y: %d Z: %d"), CameraLocation.X, CameraLocation.Y, CameraLocation.Z);
 
 		FActorSpawnParameters Params;
 		Params.bNoFail = true;
@@ -38,7 +38,8 @@ void ABattleshipsGameModeBase::PostLogin(APlayerController* NewPlayer)
 	if (CameraPawn != nullptr)
 	{
 		NewPlayer->Possess(CameraPawn);
-		UE_LOG(LogTemp, Warning, TEXT("CAMERA POSSESSED: %s"), *CameraPawn->GetName());
+		ABattleshipsPlayerController* BattleshipsNewPlayer = Cast<ABattleshipsPlayerController>(NewPlayer);
+		SpawnShips(BattleshipsNewPlayer, SelectedStartingPoint);
 	}
 	else
 	{
@@ -48,3 +49,25 @@ void ABattleshipsGameModeBase::PostLogin(APlayerController* NewPlayer)
 	ActorPlayerSpawns.RemoveSingle(SelectedSpawn);
 }
 
+void ABattleshipsGameModeBase::SpawnShips(ABattleshipsPlayerController* Controller, APlayerStartingPoint* StartingPoint)
+{
+	FActorSpawnParameters Params;
+	Params.bNoFail = true;
+
+	for (size_t i = 0; i < 4; i++)
+	{
+		if (StartingPoint)
+		{
+			AWarship* Ship = GetWorld()->SpawnActor<AWarship>(
+				WarshipTestPawnBP,
+				StartingPoint->GetShipSpawnLocation(i),
+				StartingPoint->GetShipSpawnRotation(i),
+				Params);
+			Controller->AddPlayerShip(Ship);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("CANNOT ACCESS SHIPS #%i SPAWNPOINT"), i);
+		}
+	}
+}

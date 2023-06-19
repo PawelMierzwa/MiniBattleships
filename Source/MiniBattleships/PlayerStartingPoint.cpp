@@ -26,11 +26,16 @@ APlayerStartingPoint::APlayerStartingPoint()
 
 	ShipSpawnpoint4 = CreateDefaultSubobject<UBoxComponent>(TEXT("Ship Spawnpoint 4"));
 	ShipSpawnpoint4->SetupAttachment(SceneComponent);
+
+	SpawnArray = { ShipSpawnpoint1, ShipSpawnpoint2, ShipSpawnpoint3, ShipSpawnpoint4 };
 }
 
-// Called when the game starts or when spawned
-void APlayerStartingPoint::BeginPlay()
+FVector APlayerStartingPoint::GetShipSpawnLocation(int16 index)
 {
-	Super::BeginPlay();
-	
+	return SpawnArray[index]->GetComponentLocation();
+}
+
+FRotator APlayerStartingPoint::GetShipSpawnRotation(int16 index)
+{
+	return SpawnArray[index]->GetComponentRotation();
 }
