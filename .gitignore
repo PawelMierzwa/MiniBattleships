@@ -13,3 +13,5 @@ Saved
 *.xcodeproj
 *.xcworkspace
 /Platforms/HoloLens/
+/MiniBattleships.uproject
+/.vsconfig
