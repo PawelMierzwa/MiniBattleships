@@ -34,12 +34,23 @@ public:
 	UFUNCTION(BlueprintPure)
 	float GetHealthPercent() const;
 
+	void TriggerMove(float Power);
+
 private:
-	// Hp set on start, default 3
+	// Hp set on start
 	UPROPERTY(EditDefaultsOnly)
 	int16 MaxHealthPoints = 3;
-	// Self explanatory
 	int16 CurrentHealthPoints;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
+	float PowerMultiplier = 500.0f;
+	float LaunchPower = 0.0f;
+	bool bIsLaunching = false;
+
+	float LoopTimer = 0.0f;
+	FTimerHandle MoveTimer;
+
+	void UpdateMove();
 
 	//Component responsible for showing and hiding the select decal
 	UPROPERTY(VisibleAnywhere)

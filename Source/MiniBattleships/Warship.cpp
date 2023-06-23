@@ -11,7 +11,6 @@
 
 AWarship::AWarship()
 {
-	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	//Root component
@@ -32,14 +31,12 @@ AWarship::AWarship()
 	SelectableComponent = CreateDefaultSubobject<USelectableComponent>(TEXT("Selectable Component"));
 }
 
-// Called when the game starts or when spawned
 void AWarship::BeginPlay()
 {
 	Super::BeginPlay();
 	CurrentHealthPoints = MaxHealthPoints;
 }
 
-// Called every frame
 void AWarship::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -53,14 +50,55 @@ bool AWarship::bIsDead() const
 
 float AWarship::GetHealthPercent() const
 {
-	//TODO: figure out the best way to display current hp on a pawn
-	return CurrentHealthPoints/MaxHealthPoints;
+	return CurrentHealthPoints / MaxHealthPoints;
+}
+
+void AWarship::TriggerMove(float Power)
+{
+	if (!bIsLaunching)
+	{
+		bIsLaunching = true;
+		LoopTimer = 0.0f;
+		LaunchPower = Power;
+		GetWorldTimerManager().ClearTimer(MoveTimer);
+		GetWorldTimerManager().SetTimer(MoveTimer, this, &AWarship::UpdateMove, 0.05f, true);
+	}
+}
+
+void AWarship::UpdateMove()
+{
+	if (bIsLaunching)
+	{
+		FVector Velocity;
+		LoopTimer += 0.05f;
+		if (LoopTimer <= 0.5)
+		{
+			Velocity = GetActorForwardVector() * PowerMultiplier * LaunchPower;
+		}
+		else
+		{
+			if (LoopTimer >= 2.5f || Velocity.IsNearlyZero())
+			{
+				GetWorldTimerManager().ClearTimer(MoveTimer);
+				LoopTimer = 0.0f;
+				bIsLaunching = false;
+				return;
+			}
+			Velocity = Velocity / 1.5;
+		}
+		FHitResult HitResult;
+		AddActorWorldOffset(Velocity, true, &HitResult);
+		if (HitResult.bBlockingHit)
+		{
+			Velocity = FVector::ZeroVector;
+		}
+	}
 }
 
 float AWarship::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float DamageApplied = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	
+
 	if (bIsDead())
 	{
 		ABattleshipsGameModeBase* GameMode = GetWorld()->GetAuthGameMode<ABattleshipsGameModeBase>();
@@ -70,7 +108,7 @@ float AWarship::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 			//GameMode->PawnKilled(this);
 		}
 		DetachFromControllerPendingDestroy();
-		
+
 		//TODO: Add Collision
 		//GetCapsuleComponent()->SetCollsionEnabled(ECollisionEnabled::NoCollision);
 	}
