@@ -4,10 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "Components/DecalComponent.h"
-#include "Components/BoxComponent.h"
-#include "WarshipMovementComponent.h"
-#include "SelectableComponent.h"
 #include "Warship.generated.h"
 
 UCLASS()
@@ -47,16 +43,16 @@ private:
 
 	//Component responsible for showing and hiding the select decal
 	UPROPERTY(VisibleAnywhere)
-	USelectableComponent* SelectableComponent;
+	class USelectableComponent* SelectableComponent;
 	//Component handling the movement
 	UPROPERTY(VisibleAnywhere)
-	UWarshipMovementComponent* MovementComponent;
+	class UWarshipFloatingPawnMovement* MovementComponent;
 	//Circle indicating which pawn is selected
 	UPROPERTY(VisibleAnywhere)
-	UDecalComponent* DecalComponent;
+	class UDecalComponent* DecalComponent;
 	//Collision box
 	UPROPERTY(VisibleAnywhere)
-	UBoxComponent* BoxCollision;
+	class UBoxComponent* BoxCollision;
 	//Warships Static Mesh
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* ShipMesh;

@@ -3,27 +3,33 @@
 
 #include "Warship.h"
 #include "BattleshipsGameModeBase.h"
+#include "Components/DecalComponent.h"
+#include "Components/BoxComponent.h"
+#include "WarshipFloatingPawnMovement.h"
+#include "SelectableComponent.h"
 
-// Sets default values
+
 AWarship::AWarship()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	//Root component setup
+	//Root component
 	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("Collision Box"));
 	RootComponent = BoxCollision;
 	BoxCollision->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
 
-	//Mesh setup
+	//Mesh
 	ShipMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Warship Mesh"));
 	ShipMesh->SetupAttachment(BoxCollision);
 
-	//Components setup
-	MovementComponent = CreateDefaultSubobject<UWarshipMovementComponent>(TEXT("Movement Component"));
-	SelectableComponent = CreateDefaultSubobject<USelectableComponent>(TEXT("Selectable Component"));
+	//Selection decal
 	DecalComponent = CreateDefaultSubobject<UDecalComponent>(TEXT("Selection Decal Component"));
 	DecalComponent->AttachToComponent(BoxCollision, FAttachmentTransformRules::KeepRelativeTransform);
+
+	// Custom components
+	MovementComponent = CreateDefaultSubobject<UWarshipFloatingPawnMovement>(TEXT("Movement Component"));
+	SelectableComponent = CreateDefaultSubobject<USelectableComponent>(TEXT("Selectable Component"));
 }
 
 // Called when the game starts or when spawned
