@@ -32,6 +32,16 @@ void ABattleshipsPlayerController::SetupInputComponent()
 	InputComponent->BindAxis("MouseY", this, &ABattleshipsPlayerController::MouseY);
 }
 
+
+void ABattleshipsPlayerController::RemovePlayerShip(AWarship* ShipToRemove)
+{
+	PlayerShips.Remove(ShipToRemove);
+	if (PlayerShips.Num() <= 0)
+	{
+		// TODO: Handle lose mechanic
+	}
+}
+
 void ABattleshipsPlayerController::SetControlledPawn(FHitResult Hit)
 {
 	AActor* ActorHit = Hit.GetActor();
@@ -44,6 +54,10 @@ void ABattleshipsPlayerController::SetControlledPawn(FHitResult Hit)
 	{
 		ActivePawn = ClickedPawn;
 	OnShipSelected();
+}
+	else
+	{
+		DeselectAllShips();
 }
 }
 
@@ -58,26 +72,9 @@ void ABattleshipsPlayerController::RotateShip()
 	if (!ActivePawn) return;
 
 	float Dist = FVector2D::Distance(InitialMousePosition, CurrentMousePosition);
-	float PawnZ = ActivePawn->GetActorLocation().Z;
 
-	FVector MouseDirection = FVector(CurrentMousePosition.X - InitialMousePosition.X, CurrentMousePosition.Y - InitialMousePosition.Y, PawnZ);
-	FVector LineStart = ActivePawn->GetActorLocation();
-	FVector LineEnd = LineStart + MouseDirection.GetSafeNormal() * 5.0f * Dist;
-	LineStart.Z = PawnZ;
-	LineEnd.Z = PawnZ;
-
-	// Adjusting for the rotation of the player
-	float AdjustmentDegrees = 0.0f;
-
-	if (Startpoint)
-	{
-		AdjustmentDegrees = Startpoint->GetRotationAdjustment();
-	}
 	if (Dist > 10.f)
 	{
-		Rotation = FRotationMatrix::MakeFromX(LineEnd - LineStart).Rotator();
-		Rotation.Yaw += AdjustmentDegrees;
-
 		ActivePawn->SetActorRelativeRotation(Rotation);
 	}
 }
@@ -85,7 +82,12 @@ void ABattleshipsPlayerController::RotateShip()
 void ABattleshipsPlayerController::MoveShipForward()
 {
 	if (!ActivePawn) return;
+
+	float Dist = FVector2D::Distance(InitialMousePosition, CurrentMousePosition);
+
+	if (Dist > 10.f) {
 	ActivePawn->TriggerMove(LaunchPower);
+}
 }
 
 void ABattleshipsPlayerController::OnShipSelected()
@@ -125,10 +127,13 @@ void ABattleshipsPlayerController::StopMouseDrag()
 		RotateShip();
 		MoveShipForward();
 
-		//Set the values back to zero
-		Rotation = FRotator::ZeroRotator;
 		LaunchPower = 0.0f;
 	}
+	else
+	{
+		ActivePawn->TriggerFire(Rotation);
+	}
+	Rotation = FRotator::ZeroRotator;
 }
 
 void ABattleshipsPlayerController::GetMouseDrag()
@@ -140,11 +145,27 @@ void ABattleshipsPlayerController::GetMouseDrag()
 	CurrentMousePosition = FVector2D(X, Y);
 
 	float Dist = FVector2D::Distance(InitialMousePosition, CurrentMousePosition);
+	float PawnZ = ActivePawn->GetActorLocation().Z;
+
+	FVector MouseDirection = FVector(CurrentMousePosition.X - InitialMousePosition.X, CurrentMousePosition.Y - InitialMousePosition.Y, PawnZ);
+	FVector LineStart = ActivePawn->GetActorLocation();
+	FVector LineEnd = LineStart + MouseDirection.GetSafeNormal() * 5.0f * Dist;
+	LineStart.Z = PawnZ;
+	LineEnd.Z = PawnZ;
+
+	float AdjustmentDegrees = 0.0f;
+
+	if (Startpoint)
+	{
+		AdjustmentDegrees = Startpoint->GetRotationAdjustment();
+	}
 	if (Dist > MaxDist)
 	{
 		Dist = MaxDist;
 	}
 	LaunchPower = Dist / MaxDist;
+	Rotation = FRotationMatrix::MakeFromX(LineEnd - LineStart).Rotator();
+	Rotation.Yaw += AdjustmentDegrees;
 }
 
 void ABattleshipsPlayerController::OnMouseClick()
@@ -153,10 +174,8 @@ void ABattleshipsPlayerController::OnMouseClick()
 	if (GetHitResultUnderCursor(ECollisionChannel::ECC_GameTraceChannel1, false, HitResultShip))
 	{
 		SetControlledPawn(HitResultShip);
-		if (bIsActionMoving)
-		{
 			StartMouseDrag();
-		}
+
 		return;
 	}
 
@@ -182,8 +201,6 @@ void ABattleshipsPlayerController::AbilityTrigger() {
 
 void ABattleshipsPlayerController::SwitchActionType()
 {
-	//true - Action = move
-	//false - Action = attack
 	bIsActionMoving = !bIsActionMoving;
 	UE_LOG(LogTemp, Warning, TEXT("Switched the action type to %d"), bIsActionMoving);
 }

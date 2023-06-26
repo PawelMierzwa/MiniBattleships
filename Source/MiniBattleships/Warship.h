@@ -23,18 +23,17 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Damage handling
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-
-	// Returns if a pawn is dead
-	UFUNCTION(BlueprintPure)
-	bool bIsDead() const;
-
 	// Sends current health state to blueprint UI
 	UFUNCTION(BlueprintPure)
 	float GetHealthPercent() const;
 
+	void SetPlayerController(class ABattleshipsPlayerController* Player) { BattleshipsPlayerController = Player; };
+	class ABattleshipsPlayerController* GetShipPlayerController() { return BattleshipsPlayerController; };
+
 	void TriggerMove(float Power);
+	void TriggerFire(FRotator& Direction);
+
+	void HandleDestruction();
 
 private:
 	// Hp set on start
@@ -50,21 +49,43 @@ private:
 	float LoopTimer = 0.0f;
 	FTimerHandle MoveTimer;
 
+	class ABattleshipsPlayerController* BattleshipsPlayerController;
+	const class ABattleshipsGameModeBase* BattleshipsGameMode;
+
+	UFUNCTION()
 	void UpdateMove();
+
+	UFUNCTION()
+	void DamageTaken(
+		AActor* DamagedActor, 
+		float Damage, 
+		const UDamageType* DamageType, 
+		class AController* Instigatr, 
+		AActor* DamageCauser);
+
+	UFUNCTION()
+	bool bIsDead() const;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class AProjectile> ProjectileClass;
 
 	//Component responsible for showing and hiding the select decal
 	UPROPERTY(VisibleAnywhere)
 	class USelectableComponent* SelectableComponent;
-	//Component handling the movement
-	UPROPERTY(VisibleAnywhere)
-	class UWarshipFloatingPawnMovement* MovementComponent;
+
 	//Circle indicating which pawn is selected
 	UPROPERTY(VisibleAnywhere)
 	class UDecalComponent* DecalComponent;
-	//Collision box
+
+	UPROPERTY(VisibleAnywhere)
+	class UWarshipFloatingPawnMovement* MovementComponent;
+
 	UPROPERTY(VisibleAnywhere)
 	class UBoxComponent* BoxCollision;
-	//Warships Static Mesh
+
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* ShipMesh;
+	
+	UPROPERTY(EditDefaultsOnly)
+	USceneComponent* ProjectileSpawnpoint;
 };

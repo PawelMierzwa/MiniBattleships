@@ -20,6 +20,7 @@ public:
 
 public:
 	void AddPlayerShip(AWarship* ShipToAdd) { PlayerShips.Add(ShipToAdd); };
+	void RemovePlayerShip(AWarship* ShipToRemove);
 	void SetPlayerStartingPoint(class APlayerStartingPoint* StartingPoint) { Startpoint = StartingPoint; };
 
 private:
@@ -53,16 +54,15 @@ private:
 	FVector2D CurrentMousePosition;
 	bool bIsDragging = false;
 
-	// Defines if the action made is moving or attacking
-	bool bIsActionMoving = 1;
-	//Current clicked pawn
-	AWarship* ActivePawn;
-
 	FRotator Rotation = FRotator::ZeroRotator;
 	float LaunchPower = 0.0f;
+	// Defines if the action made is moving or attacking
+	bool bIsActionMoving = 1;
 
 	UPROPERTY(EditDefaultsOnly)
 	float MaxDist = 100.0;
+
+	AWarship* ActivePawn;
 
 	//Array of pawns that belong to the player
 	TArray<AWarship*> PlayerShips;

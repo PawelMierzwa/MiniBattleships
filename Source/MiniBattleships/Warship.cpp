@@ -2,11 +2,13 @@
 
 
 #include "Warship.h"
-#include "BattleshipsGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/DecalComponent.h"
 #include "Components/BoxComponent.h"
+#include "BattleshipsPlayerController.h"
 #include "WarshipFloatingPawnMovement.h"
 #include "SelectableComponent.h"
+#include "Projectile.h"
 
 
 AWarship::AWarship()
@@ -18,11 +20,12 @@ AWarship::AWarship()
 	RootComponent = BoxCollision;
 	BoxCollision->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
 
-	//Mesh
 	ShipMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Warship Mesh"));
 	ShipMesh->SetupAttachment(BoxCollision);
 
-	//Selection decal
+	ProjectileSpawnpoint = CreateDefaultSubobject<USceneComponent>(TEXT("Projectile Spawnpoint"));
+	ProjectileSpawnpoint->SetupAttachment(BoxCollision);
+
 	DecalComponent = CreateDefaultSubobject<UDecalComponent>(TEXT("Selection Decal Component"));
 	DecalComponent->AttachToComponent(BoxCollision, FAttachmentTransformRules::KeepRelativeTransform);
 
@@ -35,6 +38,7 @@ void AWarship::BeginPlay()
 {
 	Super::BeginPlay();
 	CurrentHealthPoints = MaxHealthPoints;
+	OnTakeAnyDamage.AddDynamic(this, &AWarship::DamageTaken);
 }
 
 void AWarship::Tick(float DeltaTime)
@@ -57,6 +61,7 @@ void AWarship::TriggerMove(float Power)
 {
 	if (!bIsLaunching)
 	{
+		if (!GetVelocity().IsZero()) return;
 		bIsLaunching = true;
 		LoopTimer = 0.0f;
 		LaunchPower = Power;
@@ -65,12 +70,28 @@ void AWarship::TriggerMove(float Power)
 	}
 }
 
+void AWarship::TriggerFire(FRotator& Direction)
+{
+	FVector Location = ProjectileSpawnpoint->GetComponentLocation();
+
+	AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, Location, Direction);
+	Projectile->SetOwner(this);
+}
+
+void AWarship::HandleDestruction()
+{
+	SelectableComponent->DeselectActor();
+	SetActorHiddenInGame(true);
+	SetActorTickEnabled(false);
+}
+
 void AWarship::UpdateMove()
 {
 	if (bIsLaunching)
 	{
 		FVector Velocity;
 		LoopTimer += 0.05f;
+		
 		if (LoopTimer <= 0.5)
 		{
 			Velocity = GetActorForwardVector() * PowerMultiplier * LaunchPower;
@@ -95,23 +116,16 @@ void AWarship::UpdateMove()
 	}
 }
 
-float AWarship::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	float DamageApplied = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+void AWarship::DamageTaken(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* Instigatr, AActor* DamageCauser) {
+	if (Damage <= 0.f) return;
 
+	CurrentHealthPoints -= Damage;
 	if (bIsDead())
 	{
-		ABattleshipsGameModeBase* GameMode = GetWorld()->GetAuthGameMode<ABattleshipsGameModeBase>();
-		if (GameMode != nullptr)
-		{
-			// TODO: Handle Pawn Death
-			//GameMode->PawnKilled(this);
-		}
+		HandleDestruction();
+		BattleshipsPlayerController->RemovePlayerShip(this);
 		DetachFromControllerPendingDestroy();
-
-		//TODO: Add Collision
-		//GetCapsuleComponent()->SetCollsionEnabled(ECollisionEnabled::NoCollision);
+		ShipMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		BoxCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
 	}
-
-	return DamageApplied;
-}

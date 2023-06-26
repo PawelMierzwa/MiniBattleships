@@ -21,6 +21,7 @@ public:
 	FRotator GetCameraRotation() { return CameraLocation->GetComponentRotation(); };
 	FVector GetShipSpawnLocation(int16 index);
 	FRotator GetShipSpawnRotation(int16 index);
+	float GetRotationAdjustment() { return RotationAdjustment; };
 
 private:
 	TArray<UBoxComponent*> SpawnArray;
@@ -37,4 +38,7 @@ private:
 	UBoxComponent* ShipSpawnpoint3;
 	UPROPERTY(EditDefaultsOnly)
 	UBoxComponent* ShipSpawnpoint4;
+
+	UPROPERTY(EditAnywhere)
+	float RotationAdjustment = 90.0f;
 };

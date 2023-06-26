@@ -37,8 +37,9 @@ void ABattleshipsGameModeBase::PostLogin(APlayerController* NewPlayer)
 	}
 	if (CameraPawn != nullptr)
 	{
-		NewPlayer->Possess(CameraPawn);
 		ABattleshipsPlayerController* BattleshipsNewPlayer = Cast<ABattleshipsPlayerController>(NewPlayer);
+		BattleshipsNewPlayer->SetPlayerStartingPoint(SelectedStartingPoint);
+		NewPlayer->Possess(CameraPawn);
 		SpawnShips(BattleshipsNewPlayer, SelectedStartingPoint);
 	}
 	else
@@ -63,6 +64,7 @@ void ABattleshipsGameModeBase::SpawnShips(ABattleshipsPlayerController* Controll
 				StartingPoint->GetShipSpawnLocation(i),
 				StartingPoint->GetShipSpawnRotation(i),
 				Params);
+			Ship->SetPlayerController(Controller);
 			Controller->AddPlayerShip(Ship);
 		}
 		else

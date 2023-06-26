@@ -17,7 +17,10 @@ class MINIBATTLESHIPS_API ABattleshipsGameModeBase : public AGameModeBase
 public:
 	ABattleshipsGameModeBase();
 
+protected:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
+
+public:
 
 private:
 	TArray<AActor*> ActorPlayerSpawns;
